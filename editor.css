@@ -344,6 +344,146 @@
   background: linear-gradient(135deg, #2196F3, #1976D2);
 }
 
+/* Help Content Styles */
+.help-content {
+  max-width: 900px;
+  line-height: 1.6;
+  color: #333; /* Ensure all text is dark */
+}
+
+.help-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  color: #333; /* Force dark text */
+}
+
+.help-section:last-child {
+  border-bottom: none;
+}
+
+.help-section h4 {
+  color: #333 !important;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.help-section h5 {
+  color: #667eea !important;
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.help-section h6 {
+  color: #4CAF50 !important;
+  margin: 1rem 0 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.help-section p {
+  color: #333 !important;
+  margin: 0.5rem 0;
+}
+
+.help-section ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  color: #333 !important;
+}
+
+.help-section li {
+  margin-bottom: 0.5rem;
+  color: #333 !important;
+}
+
+.help-section strong {
+  color: #333 !important;
+  font-weight: 600;
+}
+
+.help-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.help-table th,
+.help-table td {
+  padding: 0.5rem;
+  text-align: left;
+  border: 1px solid #e0e0e0;
+}
+
+.help-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #333 !important;
+}
+
+.help-table td {
+  color: #333 !important;
+}
+
+.help-table code {
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.8rem;
+  color: #667eea !important;
+}
+
+.feature-example,
+.pattern-example {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+  border-left: 4px solid #667eea;
+  color: #333 !important;
+}
+
+.feature-example pre,
+.pattern-example pre {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 0.5rem 0 0 0;
+}
+
+.feature-example code,
+.pattern-example code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #333 !important;
+}
+
+.help-section ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  color: #333 !important;
+}
+
+.help-section li {
+  margin-bottom: 0.5rem;
+  color: #333 !important;
+}
+
+.help-section kbd {
+  background: #f5f5f5;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  border: 1px solid #ccc;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .editor-panel {

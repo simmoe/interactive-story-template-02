@@ -11,7 +11,7 @@ Create immersive, branching narratives that combine video, images, audio, and us
 - **Interactive environments** with clickable hotspots
 - **Multimedia experiences** combining images, audio, and video
 - **Educational content** with engagement tracking
-- **Horror stories, mysteries, adventures** - any genre you imagine!
+- **Hardware integration** via MQTT for physical buttons
 
 ## 🚀 Quick Start
 
@@ -25,15 +25,26 @@ This template now includes better support for running directly from local files!
 3. If you see CORS errors, use one of the server options below
 4. **Press `Ctrl+E` to open the live story editor!** ✨
 
-**🔧 Server Options (if needed):**
+**🔧 Easy Server Options:**
 
-**Firefox (Most Compatible):**
-- Firefox handles local files better than Chrome
-- Simply open `index.html` with Firefox
+**🍎 Mac - Servez (Easiest!):**
+1. Download [Servez](https://servez.dev/) from Mac App Store
+2. Drag your project folder onto Servez icon
+3. Click the URL that appears
 
-**Local Server (Chrome/Safari):**
-- Open Terminal/Command Prompt in project folder  
-- Run: `python -m http.server 8000`
+**🪟 Windows - Fenix Web Server:**
+1. Install "Fenix Web Server" from Microsoft Store
+2. Open app, click "Select Folder", choose your project
+3. Click "Start Server"
+
+**💻 Any Platform - VS Code:**
+1. Install [VS Code](https://code.visualstudio.com/)
+2. Install "Live Server" extension
+3. Right-click `index.html` → "Open with Live Server"
+
+**🐍 Terminal (Built-in on Mac/Linux):**
+- Open Terminal in project folder
+- Run: `python3 -m http.server 8000`
 - Open: `http://localhost:8000`
 
 **VS Code Users:**
@@ -57,7 +68,13 @@ const settings = {
   startBackground: './assets/front.png',          // Start screen background image
   debugHotspots: false,                          // Show hotspot boundaries (for development)
   activationCounterText: 'Activations left: ',   // Counter text (Danish/English)
-  hotspotExhaustedText: 'Hotspot exhausted'      // Exhausted hotspot message
+  hotspotExhaustedText: 'Hotspot exhausted',      // Exhausted hotspot message
+  
+  // MQTT Integration (for physical buttons)
+  mqttEnabled: true,                             // Enable MQTT connection
+  mouseEnabled: false,                           // Disable mouse when using MQTT
+  mqttTopic: 'my-interactive-story',             // MQTT topic to subscribe to
+  mqttServer: 'wss://mqtt.nextservices.dk'       // MQTT server URL
 }
 ```
 

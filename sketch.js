@@ -28,6 +28,10 @@ let overlayVideoAlpha = 0;
 let jumpscareSession = null // { start, wait, duration, media, nextPage }
 let userInteracted = false
 
+// MQTT variables
+let mqttClient = null
+let mqttConnected = false
+
 function setupDomBindings(){
   captionBar = select('#captionBar')
   captionText = select('#captionText')
@@ -82,6 +86,11 @@ async function setup(){
 
       setupDomBindings()
       enterPage(startPage)
+      
+      // Initialize MQTT if enabled
+      if (settings.mqttEnabled) {
+        setupMqtt()
+      }
     } catch (error) {
       console.error('Asset loading failed:', error);
       loadingDiv.html('Some assets failed to load, but continuing...');
@@ -352,8 +361,28 @@ function enterPage(id){
 
 function goto(id){
   if (!id) return
+  
+  // Reset hotspots if going back to start page or from death/escape pages
+  if (id === startPage || (current && (current.id === '#death' || current.id === '#escape'))) {
+    resetAllHotspotCounters()
+  }
+  
   stopAllMedia()
   enterPage(id)
+}
+
+function resetAllHotspotCounters() {
+  // Reset activation counters for all hotspots in all pages
+  pages.forEach(page => {
+    if (page.hotspots) {
+      page.hotspots.forEach(hotspot => {
+        if (hotspot.meta && hotspot.meta.maxActivations) {
+          hotspot.meta.activationCount = 0
+        }
+      })
+    }
+  })
+  console.log('All hotspot activation counters reset')
 }
 
 function stopAllMedia(){
@@ -365,8 +394,57 @@ function stopAllMedia(){
 }
 
 function mousePressed(){
-  // emulate physical click
-  onPhysicalClick()
+  // Only handle mouse clicks if mouse is enabled in settings
+  if (settings.mouseEnabled) {
+    onPhysicalClick()
+  }
+}
+
+function setupMqtt() {
+  try {
+    console.log('Setting up MQTT connection...')
+    
+    // Connect to MQTT server
+    mqttClient = mqtt.connect(settings.mqttServer)
+
+    // Handle connection success
+    mqttClient.on('connect', () => {
+      console.log('MQTT Client connected to:', settings.mqttServer)
+      mqttConnected = true
+      
+      // Subscribe to the configured topic
+      mqttClient.subscribe(settings.mqttTopic, (err) => {
+        if (err) {
+          console.error('MQTT subscription error:', err)
+        } else {
+          console.log('MQTT subscribed to topic:', settings.mqttTopic)
+        }
+      })
+    })
+    
+    // Handle incoming messages
+    mqttClient.on('message', (topic, message) => {
+      console.log('MQTT message received:', message.toString(), 'on topic:', topic)
+      
+      // Treat any MQTT message as a physical click
+      onPhysicalClick()
+    })
+    
+    // Handle connection errors
+    mqttClient.on('error', (error) => {
+      console.error('MQTT connection error:', error)
+      mqttConnected = false
+    })
+    
+    // Handle disconnection
+    mqttClient.on('close', () => {
+      console.log('MQTT connection closed')
+      mqttConnected = false
+    })
+    
+  } catch (error) {
+    console.error('Failed to setup MQTT:', error)
+  }
 }
 
 function keyPressed(){
@@ -404,6 +482,18 @@ function onPhysicalClick(){
     const a = activeHotspot.action
     deactivateHotspot()
     if (a) goto(a)
+    return
+  }
+  
+  // Fallback: check for page buttons (primary button gets priority)
+  const buttons = document.querySelectorAll('.page-button')
+  if (buttons.length > 0) {
+    // Find primary button first, otherwise use first button
+    let targetButton = Array.from(buttons).find(btn => btn.classList.contains('primary'))
+    if (!targetButton) targetButton = buttons[0]
+    
+    const action = targetButton.dataset.action
+    if (action) goto(action)
   }
 }
 
@@ -580,9 +670,16 @@ function setupPageButtons(page) {
         buttonEl.addClass('primary')
       }
       
-      // Set click handler
+      // Set click handler - respect mouse/MQTT settings
       if (btn.action) {
-        buttonEl.mousePressed(() => goto(btn.action))
+        buttonEl.mousePressed(() => {
+          if (settings.mouseEnabled) {
+            goto(btn.action)
+          }
+        })
+        
+        // Store action for MQTT to use
+        buttonEl.elt.dataset.action = btn.action
       }
       
       // Append to container

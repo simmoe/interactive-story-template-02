@@ -32,6 +32,7 @@ function initializeEditor() {
           <button class="tab-btn active" onclick="switchTab('settings')">⚙️ Settings</button>
           <button class="tab-btn" onclick="switchTab('structure')">📖 Story Structure</button>
           <button class="tab-btn" onclick="switchTab('assets')">🖼️ Assets Guide</button>
+          <button class="tab-btn" onclick="switchTab('help')">❓ Help & Reference</button>
         </div>
         
         <div class="tab-content">
@@ -95,6 +96,150 @@ function initializeEditor() {
                   <li>Test your story after adding new assets</li>
                   <li>Consider using compressed formats (JPEG for photos, PNG for graphics)</li>
                 </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div id="helpTab" class="tab-pane">
+            <h3>📚 Interactive Story Framework Reference</h3>
+            <div class="help-content">
+              <div class="help-section">
+                <h4>🎯 What You Can Create</h4>
+                <ul>
+                  <li><strong>Branching narratives</strong> with multiple paths and endings</li>
+                  <li><strong>Video-driven stories</strong> with timed user choices</li>
+                  <li><strong>Interactive environments</strong> with clickable hotspots</li>
+                  <li><strong>Multimedia experiences</strong> combining images, audio, and video</li>
+                  <li><strong>Educational content</strong> with engagement tracking</li>
+                </ul>
+              </div>
+
+              <div class="help-section">
+                <h4>📖 Story Structure Guide</h4>
+                <h5>Required Page Fields:</h5>
+                <table class="help-table">
+                  <tr><th>Field</th><th>Type</th><th>Description</th><th>Example</th></tr>
+                  <tr><td><code>id</code></td><td>string</td><td>Unique identifier</td><td><code>'#page1'</code></td></tr>
+                  <tr><td><code>title</code></td><td>string</td><td>Page title</td><td><code>'The Basement'</code></td></tr>
+                  <tr><td><code>background</code></td><td>string</td><td>Background image path</td><td><code>'./assets/basement.png'</code></td></tr>
+                </table>
+
+                <h5>Optional Page Features:</h5>
+                <div class="feature-example">
+                  <h6>🎬 Video Scenes</h6>
+                  <pre><code>film: {
+  video: './assets/girl.mp4',
+  videoDuration: 4000,
+  duration: 3000,
+  text: 'Help the girl or run?',
+  overlay: {
+    image: './assets/choice-overlay.png',
+    x: 0.2, y: 0.2, w: 0.6, h: 0.6
+  },
+  action: '#help',
+  timeoutAction: '#run'
+}</code></pre>
+                </div>
+
+                <div class="feature-example">
+                  <h6>👻 Jumpscares</h6>
+                  <pre><code>jumpscare: {
+  wait: 10000,
+  duration: 3000,
+  image: './assets/jumpscare.jpg',
+  audio: './assets/scream.wav',
+  nextPage: '#death'
+}</code></pre>
+                </div>
+
+                <div class="feature-example">
+                  <h6>🎯 Interactive Hotspots</h6>
+                  <pre><code>hotspots: [{
+  type: 'hotspot',
+  x: 0.5, y: 0.3, r: 0.1,  // 50% width, 30% height, 10% radius
+  text: 'Examine the door',
+  duration: 5000,
+  action: '#nextRoom',
+  timeoutAction: '#stay',
+  media: {
+    audio: './assets/door.mp3',
+    overlay: './assets/door-open.png'
+  },
+  meta: {
+    maxActivations: 3,
+    activationCount: 0
+  }
+}]</code></pre>
+                </div>
+              </div>
+
+              <div class="help-section">
+                <h4>🎮 Interaction Pattern</h4>
+                <p>This framework uses a <strong>binary choice system</strong>:</p>
+                <ul>
+                  <li><strong>🖱️ CLICK</strong> (press button during timer) → Goes to <code>action</code></li>
+                  <li><strong>⏱️ TIMEOUT</strong> (wait for timer to expire) → Goes to <code>timeoutAction</code></li>
+                </ul>
+                <p>Perfect for educational settings with single physical button via MQTT.</p>
+              </div>
+
+              <div class="help-section">
+                <h4>🎨 Design Best Practices</h4>
+                <ul>
+                  <li><strong>Responsive Coordinates:</strong> Always use percentage values (0-1) for positions</li>
+                  <li><strong>Clear Timing:</strong> Quick reactions (2-3s), Examination (5-7s), Tension (8-15s)</li>
+                  <li><strong>File Organization:</strong> Keep assets in <code>./assets/</code> folder</li>
+                  <li><strong>File Sizes:</strong> Images under 2MB, videos under 10MB</li>
+                </ul>
+              </div>
+
+              <div class="help-section">
+                <h4>🛠️ Development Tools</h4>
+                <ul>
+                  <li><strong>Debug Mode:</strong> Set <code>debugHotspots: true</code> in settings to see hotspot outlines</li>
+                  <li><strong>Editor Shortcuts:</strong> <kbd>Ctrl+E</kbd> to open, <kbd>Esc</kbd> to close</li>
+                  <li><strong>Export/Import:</strong> Save and share your configurations as JSON files</li>
+                </ul>
+              </div>
+
+              <div class="help-section">
+                <h4>📡 MQTT Integration</h4>
+                <p>Connect physical buttons via MQTT for interactive installations:</p>
+                <div class="feature-example">
+                  <h6>Settings Configuration:</h6>
+                  <pre><code>const settings = {
+  mqttEnabled: true,        // Enable MQTT connection
+  mouseEnabled: false,      // Disable mouse clicks (use MQTT only)
+  mqttTopic: 'my-story',    // MQTT topic to subscribe to
+  mqttServer: 'wss://mqtt.nextservices.dk'  // MQTT server URL
+}</code></pre>
+                </div>
+                <ul>
+                  <li><strong>Any message</strong> on the MQTT topic triggers a "click"</li>
+                  <li><strong>Mouse clicks</strong> can be disabled when using MQTT</li>
+                  <li><strong>Connection status</strong> shown in top-left corner</li>
+                  <li><strong>Perfect for</strong> physical installations with hardware buttons</li>
+                </ul>
+              </div>
+
+              <div class="help-section">
+                <h4>💡 Example Patterns</h4>
+                <div class="pattern-example">
+                  <h6>Mystery/Horror Story:</h6>
+                  <pre><code>{
+  id: '#investigation',
+  background: './assets/crime-scene.png',
+  heading: 'The Evidence',
+  hotspots: [{
+    x: 0.2, y: 0.4, r: 0.08,
+    text: 'Examine the bloodstain',
+    media: { overlay: './assets/blood-closeup.png' },
+    duration: 4000,
+    action: '#revelation',
+    timeoutAction: '#missed-clue'
+  }]
+}</code></pre>
+                </div>
               </div>
             </div>
           </div>
