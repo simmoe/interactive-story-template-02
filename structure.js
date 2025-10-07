@@ -1,45 +1,3 @@
-/*
-  Interaktiv historie – structure.js
-  ----------------------------------
-  'pages' er et array af side-objekter. Hver side beskriver en interaktiv "tavle".
-
-  ✅ Felter i et side-objekt (minimum):
-  - id:        Unikt id (string), fx "#page1"
-  - title:     Kort titel (string)
-  - background: Sti til baggrundsbillede (string) – kan være lokal eller url
-  - hotspots:  Liste af klik- eller hover-områder (array)
-
-  ➕ Mulige ekstra felter i et side-objekt:
-  - heading:   (string) En synlig overskrift der renderes som <h1> midt på siden
-  - buttons:   (array) Liste af knapper: [{ text: 'Tekst', action: '#id', style?: 'primary|secondary' }]
-  - button:    (object) En valgfri knap med tekst og evt. handling (bagudkompatibilitet)
-  - film:      (object) Valgfrit fuldskærms-klip, der afspilles automatisk og slutter med valg via CLICK/TIMEOUT
-               Struktur: { video: '...mp4', duration: ms, text: 'bjælketekst', action?: '#id', timeoutAction?: '#id' }
-  - jumpscare: (object) Automatisk fuldskærms jumpscare efter ventetid
-               Struktur: { wait: ms, duration: ms, image?: '...jpg', video?: '...mp4', audio?: '...wav', nextPage?: '#id' }
-
-  ✅ Felter i et hotspot-objekt (enkelt og konsekvent):
-  - type:   "text" | "goto" | "audio" | "video" | "image" | "hotspot"
-  - x, y:   centrum-koordinater i pixels
-  - r:      radius (cirkelområde) – brug r ELLER w+h
-  - w, h:   bredde og højde (rektangelområde)
-  - text:   tekst der kan vises (tooltip eller bjælke nederst)
-  - action: mål for navigation (fx "#page2") – valgfri
-  - timeoutAction: mål for navigation hvis timeren udløber uden klik (valgfri)
-  - media:  objekt med evt. { audio, overlay, image, video }
-            overlay kan være string (sti) eller objekt: { image: 'sti.png', x: 0.1, y: 0.2, w: 0.5, h: 0.3 }
-            hvis overlay-objekt har x,y,w,h coords bruges disse, ellers arves fra hotspot
-  - duration: varighed i ms (timer-bjælken er altid blå)
-  - meta:  valgfrit objekt, fx { tooltip: "...", maxActivations: 3 }
-
-  INTERAKTION (kun én fysisk knap):
-  - Spilleren kan KUN vælge ved at trykke på knappen MENS timeren kører (CLICK),
-    eller ved IKKE at trykke indtil timeren løber ud (TIMEOUT).
-  - Dette matcher et MQTT-input til websiden. `action` bruges til CLICK, `timeoutAction` til TIMEOUT.
-
-  Bemærk: Ingen logik her – kun data. En visningsmotor kan senere parse disse felter.
-*/
-
 pages = [
   // ------------------------
   // Side 1 – Anslag (Forsiden)
@@ -157,6 +115,10 @@ pages = [
       videoDuration: 4000,
       duration: 3000,
       text: 'Gå op til pigen eller tilbage på kontoret?',
+      overlay: {
+        image: './assets/girl-choice.png',
+        x: 0.2, y: 0.2, w: 0.6, h: 0.6
+      },
       action: '#page2',
       timeoutAction: '#death'
     },

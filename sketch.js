@@ -9,6 +9,10 @@ let hotspotStart = 0
 let activeOverlayImg = null
 let overlayAlpha = 0
 
+// Film overlay variables
+let filmOverlayImg = null
+let filmOverlayAlpha = 0
+
 let filmSession = null
 
 let captionBar, captionText, timerFill, pageHeading, buttonsContainer, hotspotCounter
@@ -42,6 +46,12 @@ function preload(){
 }
 
 function setup(){
+  // Initialize start screen with settings
+  select('#startTitle').html(settings.startTitle)
+  if (settings.startBackground) {
+    select('#clickToStartAudio').style('background-image', `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${settings.startBackground})`)
+  }
+  
   select('#clickToStartAudio').mousePressed(() => {
     select('#clickToStartAudio').hide()
 
@@ -71,9 +81,7 @@ function draw(){
   if (current && current._bg) {
     image(current._bg, 0, 0, width, height)
     //console.log('Tegner baggrundsbillede')
-  } else {
-    console.log('Intet baggrundsbillede loaded endnu')
-  }
+  } 
 
   // DEBUG: tegn rammer omkring hotspots
   if (settings.debugHotspots && current && current.hotspots) {
@@ -83,6 +91,33 @@ function draw(){
   // film mode
   if (activeBackgroundVideo){
       image(activeBackgroundVideo, 0, 0, width, height)
+  }
+
+  // film overlay for choice period
+  if (filmSession && filmSession.promptVisible && filmOverlayImg) {
+    push();
+    noStroke();
+    const a = constrain(filmOverlayAlpha, 0, 255);
+    tint(255, a);
+    
+    const overlay = filmSession.spec.overlay;
+    if (overlay) {
+      let x = overlay.x || 0.2;
+      let y = overlay.y || 0.2;
+      let w = overlay.w || 0.6;
+      let h = overlay.h || 0.6;
+      
+      // Convert percent coordinates to pixels
+      if (x <= 1) x = x * width;
+      if (y <= 1) y = y * height;
+      if (w <= 1) w = w * width;
+      if (h <= 1) h = h * height;
+      
+      image(filmOverlayImg, x, y, w, h);
+    }
+    
+    pop();
+    filmOverlayAlpha = lerp(filmOverlayAlpha, 255, 0.04);
   }
 
   // overlay for active hotspot image
@@ -248,6 +283,15 @@ function enterPage(id){
   // start film if present
   if (current.film){
     console.log('Starter film:', current.film)
+    
+    // Load film overlay image if present
+    if (current.film.overlay && current.film.overlay.image) {
+      filmOverlayImg = loadImage(current.film.overlay.image)
+      filmOverlayAlpha = 0
+    } else {
+      filmOverlayImg = null
+    }
+    
     activeBackgroundVideo = createVideo(current.film.video, ()=>{
       activeBackgroundVideo.size(640, 360);
       activeBackgroundVideo.play();
@@ -266,6 +310,7 @@ function enterPage(id){
     })
   }else{
     activeBackgroundVideo = null
+    filmOverlayImg = null
   }
 }
 
@@ -277,24 +322,12 @@ function goto(id){
 }
 
 function stopAllMedia(){
-  // stop video if any
-  if (filmSession && filmSession.video){
-    try { filmSession.video.pause() } catch(e){}
-    try { filmSession.video.remove() } catch(e){}
-  }
+  select('#captionBar').removeClass('show')
+  
   filmSession = null
-  // stop backgroundsound hvis der er en aktiv
-  if (activeBackgroundAudio) {
-    activeBackgroundAudio.stop()
-    activeBackgroundAudio = null
-  }
-  // stop hotspot-lyd hvis der er en aktiv
-  if (activeAudio) {
-    activeAudio.stop()
-    activeAudio = null
-  }
+  filmOverlayImg = null
+  filmOverlayAlpha = 0
 }
-
 
 function mousePressed(){
   // emulate physical click

@@ -16,6 +16,9 @@
   width: 100vw;
   height: 100vh;
   background: rgba(0,0,0,.85);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: white;
   display: grid;
   place-items: center;
@@ -23,6 +26,12 @@
   z-index: 1000;
   font-size: clamp(1rem, 2.5vw, 1.5rem);
   cursor: pointer;
+}
+
+#clickToStartAudio h1 {
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  text-align: center;
+  margin: 0;
 }
 
 /* Jumpscare overlay */
