@@ -1,0 +1,210 @@
+:root{
+  --bg: #0b0c10;
+  --panel: #11131a;
+  --ink: #e6e7ea;
+  --muted: #9aa0aa;
+  --accent: #4ea1ff;
+  --accent-weak: #256fda;
+  --danger: #ff4e69;
+}
+
+*{ box-sizing: border-box }
+
+#clickToStartAudio {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,.85);
+  color: white;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  z-index: 1000;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  cursor: pointer;
+}
+
+/* Jumpscare overlay */
+#jumpscareOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+
+#jumpscareOverlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#jumpscareContent {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+#jumpscareContent img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#jumpscareContent video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html, body{
+  margin:0;
+  padding:0;
+  height:100vh;
+  width:100vw; 
+  overflow:hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+}
+
+#app{
+  height:100vh;
+  display:grid;
+  grid-template-rows: auto 1fr; /* Only header and stage */
+  /* Ensure grid takes full viewport */
+  min-height: 100vh;
+}
+
+#header{
+  display:grid;
+  grid-template-columns: auto 1fr auto;
+  align-items:center;
+  gap:1rem;
+  padding:1rem clamp(1rem, 4vw, 2rem);
+}
+
+#hotspotCounter{
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  color: var(--muted);
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+#pageHeading{
+  margin:0;
+  font-size: clamp(1.4rem, 3.5vw, 2.6rem);
+  text-align:center;
+}
+
+#buttonsContainer{
+  justify-self:end;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.page-button{
+  padding: .6rem 1rem;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 999px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform .08s ease;
+  white-space: nowrap;
+}
+.page-button:hover{ transform: translateY(-1px) }
+.page-button:active{ transform: translateY(0) }
+.page-button.primary{ border-color: var(--accent); }
+.page-button.secondary{ border-color: var(--muted); color: var(--muted); }
+
+#stage{
+  display:grid;
+  place-items: center;
+  padding: 0 clamp(0.5rem, 3vw, 2rem);
+  /* Remove .footer-padding logic */
+}
+
+#canvasWrap{
+  width: min(90vw, 1280px);
+  aspect-ratio: 16/9;
+  background: #0f1117;
+  border: 1px solid #1e2230;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.02), 0 20px 60px rgba(0,0,0,.5);
+  position: relative; /* Ensure footer overlays only canvas */
+}
+
+/* caption + timer */
+#captionBar{
+  display:grid;
+  gap:.5rem;
+  padding: .8rem clamp(1rem, 4vw, 2rem) 1.2rem;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.25) 14%, rgba(0,0,0,.5) 100%);
+}
+
+#captionText{
+  min-height: 2.2rem;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--ink);
+  text-align:center;
+}
+
+#timerBar{
+  width: 100%;
+  height: .5rem;
+  background: #0e1420;
+  border-radius: 999px;
+  overflow: hidden;
+  outline: 1px solid rgba(255,255,255,.06);
+}
+
+#timerFill{
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-weak), var(--accent));
+  transition: width .06s linear;
+}
+
+.hide {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Footer styles */
+footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: -100%; /* Skjult under viewport */
+  z-index: 100;
+  background: var(--panel);
+  box-shadow: 0 -2px 24px rgba(0,0,0,.18);
+  padding: 1rem clamp(1rem, 4vw, 2rem);
+  min-height: 3.5rem;
+  max-height: 40vh;
+  overflow-y: auto;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: bottom 0.3s cubic-bezier(.4,0,.2,1), opacity 0.3s cubic-bezier(.4,0,.2,1);
+  will-change: bottom, opacity;
+}
+
+footer.footer-active {
+  bottom: 0; /* Skub op i viewport */
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
