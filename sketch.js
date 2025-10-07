@@ -334,6 +334,28 @@ function mousePressed(){
   onPhysicalClick()
 }
 
+function keyPressed(){
+  // Editor shortcuts
+  if ((keyIsDown(CONTROL) || keyIsDown(ALT)) && (key === 'e' || key === 'E')) {
+    // Ctrl/Cmd + E to toggle editor
+    if (typeof toggleEditor === 'function') {
+      toggleEditor();
+    }
+    return false; // Prevent default
+  }
+  
+  if (key === 'Escape') {
+    // Escape to close editor
+    if (typeof editorVisible !== 'undefined' && editorVisible && typeof hideEditor === 'function') {
+      hideEditor();
+    }
+    return false; // Prevent default
+  }
+  
+  // Let other keys pass through
+  return true;
+}
+
 function onPhysicalClick(){
   // film prompt has priority
   if (filmSession && filmSession.promptVisible){

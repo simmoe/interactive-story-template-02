@@ -18,10 +18,18 @@ Create immersive, branching narratives that combine video, images, audio, and us
 ### 1. Setup Your Environment
 1. Download or clone this template
 2. Open `index.html` in a web browser
-3. Start customizing your story in `structure.js`
+3. **Press `Ctrl+E` to open the live story editor!** ✨
 
-### 2. Configure Your Story
-Edit `settings.js` to customize the experience:
+### 2. Live Editor Features
+🎯 **In-Browser Editing**: Edit your story without leaving the page
+- **Settings Tab**: Customize appearance and behavior
+- **Structure Tab**: Create your story pages and interactions  
+- **Assets Guide**: Learn how to add images, videos, and audio
+- **Real-time Preview**: See changes instantly
+- **Export/Import**: Save and share your configurations
+
+### 3. Configure Your Story (Alternative Method)
+You can also edit `settings.js` manually:
 
 ```javascript
 const settings = {
@@ -33,8 +41,8 @@ const settings = {
 }
 ```
 
-### 3. Create Your Story
-All story content goes in `structure.js`. Here's a simple example:
+### 4. Create Your Story
+All story content goes in `structure.js`, or use the **live editor** (`Shift+9`):
 
 ```javascript
 pages = [
@@ -242,6 +250,22 @@ media: {
 ```
 
 ## 🛠️ Development Tools
+
+### Live Story Editor 🎯
+**Press `Ctrl+E` to open the built-in editor!**
+
+Features:
+- ✅ **Real-time editing** of settings and story structure
+- ✅ **Syntax validation** with clear error messages  
+- ✅ **Instant preview** - see changes immediately
+- ✅ **Export/Import** configurations as JSON files
+- ✅ **Asset management guide** with best practices
+- ✅ **No file editing required** - everything in the browser
+
+**Keyboard Shortcuts:**
+- `Ctrl+E` - Open/close editor
+- `Esc` - Close editor
+- `Ctrl/Cmd+S` in editor - Quick save (exports file)
 
 ### Debug Mode
 Enable hotspot visualization during development:
