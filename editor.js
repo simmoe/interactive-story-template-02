@@ -282,6 +282,11 @@ function applyStoredChanges() {
       pages.length = 0;
       pages.push(...newPages);
       localStorage.removeItem('tempPages');
+      
+      // Refresh asset collection after loading new pages
+      if (typeof collectAssetsFromStructure === 'function') {
+        collectAssetsFromStructure();
+      }
     }
   } catch (error) {
     console.error('Error applying stored changes:', error);

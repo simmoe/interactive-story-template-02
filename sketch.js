@@ -41,27 +41,62 @@ function setupDomBindings(){
 }
 
 function preload(){
-  // index pages
-  pages.forEach(p => pagesById[p.id] = p)
+  // Collect all assets from structure
+  collectAssetsFromStructure();
+  // Preload critical assets (images only to avoid CORS)
+  // Audio and video will be loaded on-demand with error handling
 }
 
-function setup(){
+async function setup(){
   // Initialize start screen with settings
   select('#startTitle').html(settings.startTitle)
   if (settings.startBackground) {
     select('#clickToStartAudio').style('background-image', `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${settings.startBackground})`)
   }
   
-  select('#clickToStartAudio').mousePressed(() => {
+  select('#clickToStartAudio').mousePressed(async () => {
     select('#clickToStartAudio').hide()
+    
+    // Show loading message
+    const loadingDiv = createDiv('Loading assets...');
+    loadingDiv.style('position', 'fixed');
+    loadingDiv.style('top', '50%');
+    loadingDiv.style('left', '50%');
+    loadingDiv.style('transform', 'translate(-50%, -50%)');
+    loadingDiv.style('background', 'rgba(0,0,0,0.8)');
+    loadingDiv.style('color', 'white');
+    loadingDiv.style('padding', '20px');
+    loadingDiv.style('border-radius', '10px');
+    loadingDiv.style('z-index', '9999');
 
-  const wrap = select('#canvasWrap')
-  const rect = wrap.elt.getBoundingClientRect()
-  canvas = createCanvas(rect.width, rect.height)
-  canvas.parent('canvasWrap')
+    try {
+      // Preload assets
+      await preloadAllAssets();
+      loadingDiv.remove();
+      
+      // Continue with normal setup
+      const wrap = select('#canvasWrap')
+      const rect = wrap.elt.getBoundingClientRect()
+      canvas = createCanvas(rect.width, rect.height)
+      canvas.parent('canvasWrap')
 
-  setupDomBindings()
-  enterPage(startPage)
+      setupDomBindings()
+      enterPage(startPage)
+    } catch (error) {
+      console.error('Asset loading failed:', error);
+      loadingDiv.html('Some assets failed to load, but continuing...');
+      setTimeout(() => {
+        loadingDiv.remove();
+        
+        const wrap = select('#canvasWrap')
+        const rect = wrap.elt.getBoundingClientRect()
+        canvas = createCanvas(rect.width, rect.height)
+        canvas.parent('canvasWrap')
+
+        setupDomBindings()
+        enterPage(startPage)
+      }, 2000);
+    }
   });
 }
 
@@ -286,13 +321,13 @@ function enterPage(id){
     
     // Load film overlay image if present
     if (current.film.overlay && current.film.overlay.image) {
-      filmOverlayImg = loadImage(current.film.overlay.image)
+      filmOverlayImg = safeLoadImage(current.film.overlay.image)
       filmOverlayAlpha = 0
     } else {
       filmOverlayImg = null
     }
     
-    activeBackgroundVideo = createVideo(current.film.video, ()=>{
+    activeBackgroundVideo = safeCreateVideo(current.film.video, ()=>{
       activeBackgroundVideo.size(640, 360);
       activeBackgroundVideo.play();
       activeBackgroundVideo.hide();
@@ -690,10 +725,26 @@ function pointInHotspot(px, py, h){
 }
 
 function loadImageSafe(path, cb){
-  loadImage(path, img => cb(img), err => {
-    // fallback to dummy.png
-    loadImage('./assets/dummy.png', img2 => cb(img2), err2 => cb(null))
-  })
+  // Try preloaded asset first
+  const preloaded = getPreloadedImage(path);
+  if (preloaded) {
+    cb(preloaded);
+    return;
+  }
+  
+  // Fallback to dynamic loading with error handling
+  try {
+    loadImage(path, img => cb(img), err => {
+      console.warn('Image load failed:', path, 'trying fallback')
+      loadImage('./assets/dummy.png', img2 => cb(img2), err2 => {
+        console.warn('Fallback image also failed, using null')
+        cb(null)
+      })
+    })
+  } catch (e) {
+    console.warn('loadImage threw error:', path, e)
+    cb(null)
+  }
 }
 
 function drawHotspotDebug(hotspots) {

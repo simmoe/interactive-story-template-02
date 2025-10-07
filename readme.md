@@ -16,9 +16,29 @@ Create immersive, branching narratives that combine video, images, audio, and us
 ## 🚀 Quick Start
 
 ### 1. Setup Your Environment
-1. Download or clone this template
-2. Open `index.html` in a web browser
-3. **Press `Ctrl+E` to open the live story editor!** ✨
+
+**🔥 Local File Support:**
+This template now includes better support for running directly from local files!
+
+1. Download/clone this template
+2. **Try opening `index.html` directly** in your browser first
+3. If you see CORS errors, use one of the server options below
+4. **Press `Ctrl+E` to open the live story editor!** ✨
+
+**🔧 Server Options (if needed):**
+
+**Firefox (Most Compatible):**
+- Firefox handles local files better than Chrome
+- Simply open `index.html` with Firefox
+
+**Local Server (Chrome/Safari):**
+- Open Terminal/Command Prompt in project folder  
+- Run: `python -m http.server 8000`
+- Open: `http://localhost:8000`
+
+**VS Code Users:**
+- Install "Live Server" extension
+- Right-click `index.html` → "Open with Live Server"
 
 ### 2. Live Editor Features
 🎯 **In-Browser Editing**: Edit your story without leaving the page
