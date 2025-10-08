@@ -113,29 +113,6 @@ html, body{
   text-align:center;
 }
 
-#buttonsContainer{
-  justify-self:end;
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.page-button{
-  padding: .6rem 1rem;
-  border: 1px solid var(--accent);
-  background: transparent;
-  color: var(--ink);
-  border-radius: 999px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform .08s ease;
-  white-space: nowrap;
-}
-.page-button:hover{ transform: translateY(-1px) }
-.page-button:active{ transform: translateY(0) }
-.page-button.primary{ border-color: var(--accent); }
-.page-button.secondary{ border-color: var(--muted); color: var(--muted); }
-
 #stage{
   display:grid;
   place-items: center;

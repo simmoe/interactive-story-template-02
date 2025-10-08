@@ -15,7 +15,11 @@ let filmOverlayAlpha = 0
 
 let filmSession = null
 
-let captionBar, captionText, timerFill, pageHeading, buttonsContainer, hotspotCounter
+// Choice system variables
+let choiceSession = null // { choices: [], currentIndex: 0, lastSwitch: 0, images: [] }
+let pageChoiceTimer = null // { startTime: 0, duration: 0, activated: false }
+
+let captionBar, captionText, timerFill, pageHeading, hotspotCounter
 let jumpscareOverlay, jumpscareContent
 let canvas
 
@@ -37,11 +41,10 @@ function setupDomBindings(){
   captionText = select('#captionText')
   timerFill = select('#timerFill')
   pageHeading = select('#pageHeading')
-  buttonsContainer = select('#buttonsContainer')
   hotspotCounter = select('#hotspotCounter')
   jumpscareOverlay = select('#jumpscareOverlay')
   jumpscareContent = select('#jumpscareContent')
-  console.log('DOM bindings sat:', {captionBar, captionText, timerFill, pageHeading, buttonsContainer, hotspotCounter, jumpscareOverlay})
+  console.log('DOM bindings sat:', {captionBar, captionText, timerFill, pageHeading, hotspotCounter, jumpscareOverlay})
 }
 
 function preload(){
@@ -215,6 +218,57 @@ function draw(){
     overlayAlpha = lerp(overlayAlpha, 255, 0.04);
   }
 
+  // Choice system rendering
+  if (choiceSession && choiceSession.choices) {
+    // Handle choice switching timing
+    const switchInterval = (settings.choiceShiftTime || 3) * 1000 // Convert to milliseconds
+    if (millis() - choiceSession.lastSwitch > switchInterval) {
+      choiceSession.currentIndex = (choiceSession.currentIndex + 1) % choiceSession.choices.length
+      choiceSession.lastSwitch = millis()
+      console.log('Choice highlight switched to index', choiceSession.currentIndex)
+    }
+    
+    // Render all choice images
+    push();
+    noStroke();
+    const a = constrain(overlayAlpha, 0, 255);
+    
+    choiceSession.choices.forEach((choice, index) => {
+      const img = choiceSession.images[index];
+      if (!img) return; // Skip if image not loaded yet
+      
+      // Calculate position and size
+      let x = choice.x || 0.5;
+      let y = choice.y || 0.5; 
+      let w = choice.w || 0.3;
+      let h = choice.h || 0.3;
+      
+      // Convert to pixels if needed
+      if (x <= 1) x = percentToPixel(x, 'x');
+      if (y <= 1) y = percentToPixel(y, 'y');
+      if (w <= 1) w = w * width;
+      if (h <= 1) h = h * height;
+      
+      // Apply highlighting to current choice
+      if (index === choiceSession.currentIndex) {
+        tint(255, a); // Full brightness for highlighted choice
+        // Optional: add glow effect
+        push();
+        drawingContext.shadowBlur = 20;
+        drawingContext.shadowColor = 'rgba(255, 255, 255, 0.8)';
+        image(img, x, y, w, h);
+        pop();
+      } else {
+        tint(255, a * 0.5); // Dimmed for non-highlighted choices
+      }
+      
+      image(img, x, y, w, h);
+    });
+    
+    pop();
+    overlayAlpha = lerp(overlayAlpha, 255, 0.04);
+  }
+
   // overlay for active hotspot video
   if (activeHotspot && activeOverlayVideo){
     const params = activeOverlayVideo._drawParams || { x: 0, y: 0, w: 320, h: 180 };
@@ -258,6 +312,14 @@ function draw(){
       triggerJumpscare()
     }
   }
+  
+  // update page choice timer
+  if (pageChoiceTimer && !pageChoiceTimer.activated) {
+    const elapsed = millis() - pageChoiceTimer.startTime
+    if (elapsed >= pageChoiceTimer.duration) {
+      activatePageChoices()
+    }
+  }
 }
 
 function enterPage(id){
@@ -265,9 +327,12 @@ function enterPage(id){
   activeHotspot = null
   filmSession = null
   jumpscareSession = null
+  choiceSession = null // Clear choice session
+  pageChoiceTimer = null // Clear page choice timer
   overlayAlpha = 0
   hideHotspotCounter()
   hideJumpscare()
+  
   // Stop backgroundsound hvis der er en aktiv
   if (activeBackgroundAudio) {
     activeBackgroundAudio.stop()
@@ -289,12 +354,12 @@ function enterPage(id){
     pageHeading.addClass('hide')
     console.log('Ingen heading på denne side')
   }
-
-  // buttons - support both single button (backward compatibility) and buttons array
-  setupPageButtons(current)
   
   // setup jumpscare if defined
   setupJumpscare(current)
+  
+  // setup page-level choice system if defined
+  setupPageChoices(current)
 
   // caption hidden by default
   hideCaption()
@@ -478,6 +543,20 @@ function onPhysicalClick(){
     if (a) goto(a)
     return
   }
+  
+  // Choice system has second priority
+  if (activeHotspot && choiceSession && choiceSession.choices) {
+    const selectedChoice = choiceSession.choices[choiceSession.currentIndex]
+    if (selectedChoice && selectedChoice.action) {
+      console.log('Choice selected:', selectedChoice.action, 'from choice', choiceSession.currentIndex)
+      choiceSession = null // Clear choice session
+      deactivateHotspot()
+      goto(selectedChoice.action)
+      return
+    }
+  }
+  
+  // Standard hotspot handling
   if (activeHotspot){
     const a = activeHotspot.action
     deactivateHotspot()
@@ -485,15 +564,16 @@ function onPhysicalClick(){
     return
   }
   
-  // Fallback: check for page buttons (primary button gets priority)
-  const buttons = document.querySelectorAll('.page-button')
-  if (buttons.length > 0) {
-    // Find primary button first, otherwise use first button
-    let targetButton = Array.from(buttons).find(btn => btn.classList.contains('primary'))
-    if (!targetButton) targetButton = buttons[0]
-    
-    const action = targetButton.dataset.action
-    if (action) goto(action)
+  // Page-level choice system (when no hotspot is active)
+  if (choiceSession && choiceSession.choices && !activeHotspot) {
+    const selectedChoice = choiceSession.choices[choiceSession.currentIndex]
+    if (selectedChoice && selectedChoice.action) {
+      console.log('Page choice selected:', selectedChoice.action, 'from choice', choiceSession.currentIndex)
+      choiceSession = null // Clear choice session
+      pageChoiceTimer = null // Clear page timer
+      goto(selectedChoice.action)
+      return
+    }
   }
 }
 
@@ -524,9 +604,6 @@ function activateHotspot(h){
     return
   }
   
-  // Cancel jumpscare only on actual hotspot activation (not just hover)
-  // This will be handled in onPhysicalClick when hotspot is actually clicked
-  
   activeHotspot = h
   hotspotStart = millis()
   overlayAlpha = 0
@@ -541,7 +618,31 @@ function activateHotspot(h){
   // caption
   showCaption(h.text || '')
 
-  // overlay image if provided
+  // Check if this is a choice hotspot
+  if (h.actions && Array.isArray(h.actions) && h.actions.length > 0) {
+    // Set up choice system
+    choiceSession = {
+      choices: h.actions,
+      currentIndex: 0,
+      lastSwitch: millis(),
+      images: []
+    }
+    
+    // Preload choice images
+    h.actions.forEach((choice, index) => {
+      if (choice.image) {
+        loadImageSafe(choice.image, img => {
+          if (choiceSession && choiceSession.images) {
+            choiceSession.images[index] = img
+          }
+        })
+      }
+    })
+    
+    console.log('Choice system activated with', h.actions.length, 'choices')
+  }
+
+  // Standard overlay image handling (works alongside choice system)
   activeOverlayImg = null;
   if (h.media && h.media.overlay){
     let overlayPath, overlayCoords = null;
@@ -621,6 +722,7 @@ function activateHotspot(h){
 function deactivateHotspot(){
   activeHotspot = null
   activeOverlayImg = null
+  choiceSession = null // Clear choice session
   overlayAlpha = 0
   hideCaption()
   hideHotspotCounter()
@@ -640,54 +742,6 @@ function showHotspotCounter(text) {
 function hideHotspotCounter() {
   if (hotspotCounter) {
     hotspotCounter.addClass('hide')
-  }
-}
-
-function setupPageButtons(page) {
-  // Clear existing buttons
-  buttonsContainer.html('')
-  
-  let buttons = []
-  
-  // Handle backward compatibility - single button object
-  if (page.button && page.button.text) {
-    buttons = [page.button]
-  }
-  // Handle new buttons array
-  else if (page.buttons && Array.isArray(page.buttons)) {
-    buttons = page.buttons.filter(btn => btn && btn.text)
-  }
-  
-  if (buttons.length > 0) {
-    buttons.forEach((btn, index) => {
-      const buttonEl = createButton(btn.text)
-      buttonEl.addClass('page-button')
-      
-      // Add styling classes
-      if (btn.style === 'secondary' || (buttons.length > 1 && index > 0)) {
-        buttonEl.addClass('secondary')
-      } else {
-        buttonEl.addClass('primary')
-      }
-      
-      // Set click handler - respect mouse/MQTT settings
-      if (btn.action) {
-        buttonEl.mousePressed(() => {
-          if (settings.mouseEnabled) {
-            goto(btn.action)
-          }
-        })
-        
-        // Store action for MQTT to use
-        buttonEl.elt.dataset.action = btn.action
-      }
-      
-      // Append to container
-      buttonEl.parent(buttonsContainer)
-    })
-    console.log('Satte', buttons.length, 'knapper')
-  } else {
-    console.log('Ingen knapper på denne side')
   }
 }
 
@@ -713,6 +767,51 @@ function setupJumpscare(page) {
     
     console.log('Jumpscare setup - will trigger in', page.jumpscare.wait, 'ms')
   }
+}
+
+function setupPageChoices(page) {
+  if (page.actions && Array.isArray(page.actions) && page.actions.length > 0 && page.duration) {
+    pageChoiceTimer = {
+      startTime: millis(),
+      duration: page.duration,
+      activated: false
+    }
+    
+    console.log('Page choice system setup - will activate in', page.duration, 'ms with', page.actions.length, 'choices')
+  }
+}
+
+function activatePageChoices() {
+  if (!pageChoiceTimer || pageChoiceTimer.activated || !current.actions) return
+  
+  pageChoiceTimer.activated = true
+  
+  // Deactivate any active hotspots - page choices take priority
+  if (activeHotspot) {
+    console.log('Deactivating hotspot to make way for page choices')
+    deactivateHotspot()
+  }
+  
+  // Set up choice system (similar to hotspot choice system)
+  choiceSession = {
+    choices: current.actions,
+    currentIndex: 0,
+    lastSwitch: millis(),
+    images: []
+  }
+  
+  // Preload choice images
+  current.actions.forEach((choice, index) => {
+    if (choice.image) {
+      loadImageSafe(choice.image, img => {
+        if (choiceSession && choiceSession.images) {
+          choiceSession.images[index] = img
+        }
+      })
+    }
+  })
+  
+  console.log('Page choice system activated with', current.actions.length, 'choices')
 }
 
 function triggerJumpscare() {

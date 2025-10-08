@@ -8,11 +8,12 @@ const settings = {
   // Hotspot activation counter texts
   activationCounterText: 'Antal aktiveringer: ',
   hotspotExhaustedText: 'Hotspot opbrugt',
+  choiceShiftTime: 3,
   
   // MQTT Settings
   mqttTopic: 'interactive-story',
   mqttEnabled: true, // Enable/disable MQTT connection
-  mouseEnabled: false, // Enable/disable mouse clicks (when MQTT is used)
+  mouseEnabled: true, // Enable/disable mouse clicks (when MQTT is used)
   mqttServer: 'wss://mqtt.nextservices.dk' // MQTT server URL
 }
 

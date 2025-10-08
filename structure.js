@@ -7,28 +7,39 @@ pages = [
     title: 'Huset i passet',
     background: './assets/front.png',
     heading: 'Velkommen til passet',
-    buttons: [
-      { 
-        text: 'Gå ind af fordøren', 
-        action: '#page2', 
-        style: 'primary' 
-      }
-    ],
     backgroundSound: './assets/storm.mp3',
     hotspots: [
       // Månen – foreshadowing + genvej til klimaks-aksen
       {
         type: 'hotspot',
         x: 0.38, y: 0.25, r: 0.08, // 800/1000, 200/1000, 60/750
-        text: 'Gå direkte ned i kælderen?',
+        //text: 'Eventuel tekst der beskriver valget...',
+        //'Eventuel timer der deaktiverer valget...'        
+        duration: 9000,
+        //eventuelt defaultvalg:
+        timeoutAction: '#death',
         media: {
           audio: './assets/doorOhh.mp3',
           overlay: './assets/bloodmoon.png'
         },
-        duration: 5000,
-        action: '#page4',
+        actions:[
+          {
+            action:'#page2',
+            image:"./assets/first-choice.png",
+            x: 0.2, 
+            y: 0.3,
+            h: 0.4
+          },
+          {
+            action:'#page4',
+            image:"./assets/second-choice.png",
+            x: 0.7, 
+            y: 0.3,
+            h:0.4
+          }
+        ],
         meta: {
-          maxActivations: 3,
+          maxActivations: 300,
           activationCount: 0
         }
       }
@@ -44,9 +55,22 @@ pages = [
     background: './assets/office.png',
     heading: 'Kontoret',
     backgroundSound: './assets/tv.wav',
-    buttons: [
-      { text: 'Tilbage', action: '#page1', style: 'secondary' },
-      { text: 'Gå videre til gangen', action: '#page3', style: 'primary' }
+    duration:10000,
+    actions:[
+      {
+        action:'#page4',
+        image:"./assets/first-choice.png",
+        x: 0.2, 
+        y: 0.3,
+        h: 0.4
+      },
+      {
+        action:'#page3',
+        image:"./assets/second-choice.png",
+        x: 0.7, 
+        y: 0.3,
+        h:0.4
+      }
     ],
 
     hotspots: [
@@ -59,8 +83,8 @@ pages = [
           overlay: './assets/papers.png'
         },
         duration: 2500,
-        action: '#page2',
-        timeoutAction: '#page2',
+        action: '#page3',
+        timeoutAction: '#page4',
         meta: {
           maxActivations: 1,
           activationCount: 0
@@ -78,9 +102,6 @@ pages = [
     background: './assets/gangen.png',
     backgroundSound: './assets/hall_background.flac',
     heading: 'Gangen',
-    buttons: [
-      { text: 'Tilbage til kontoret', action: '#page2', style: 'secondary' }
-    ],
     jumpscare: {
       audio: './assets/jumpscare.wav',
       image: './assets/jumpscare.jpg',
@@ -113,47 +134,23 @@ pages = [
     film: {
       video: './assets/girl.mp4',
       videoDuration: 4000,
-      duration: 3000,
-      text: 'Gå op til pigen eller tilbage på kontoret?',
-      overlay: {
-        image: './assets/girl-choice.png',
-        x: 0.2, y: 0.2, w: 0.6, h: 0.6
       },
-      action: '#page2',
-      timeoutAction: '#death'
-    },
-    hotspots: [
+    actions:[
       {
-        type: 'hotspot',
-        x: 0.38, y: 0.25, r: 0.08, // 800/1000, 200/1000, 60/750
-        text: 'Gå direkte ned i kælderen?',
-        media: {
-          audio: './assets/doorOhh.mp3',
-          overlay: {
-            image: './assets/choice-overlay.png',
-            x: 0.2, y: 0.2, w: 0.6, h: 0.6
-          }
-        },
-        duration: 5000,
-        action: '#page4',
-        meta: {
-          maxActivations: 3,
-          activationCount: 0
-        }
+        action:'#page4',
+        image:"./assets/first-choice.png",
+        x: 0.2, 
+        y: 0.3,
+        h: 0.4
       },
       {
-        type: 'hotspot',
-        x: 0, y: 0, w: 0.22, h: 0.22, // 420/1000, 520/750, 220/1000, 100/750
-        text: 'Lyden flytter sig – hold vejret',
-        media: {
-          audio: './assets/doorOhh.mp3',
-          overlay: './assets/papers.png'
-        },
-        duration: 5000,
-        action: '#escape',
-        timeoutAction: '#death'
+        action:'#page3',
+        image:"./assets/second-choice.png",
+        x: 0.7, 
+        y: 0.3,
+        h:0.4
       }
-    ]
+    ],
   },
 
   // ------------------------------
